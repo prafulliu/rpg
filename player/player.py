@@ -9,18 +9,15 @@ from gevent import event
 from gevent.queue import Queue
 from amfast.decoder import Decoder
 from amfast.encoder import Encoder
+import config.config as config
 import db.player.player as player
 import config.CMD as CMD
 CMD = CMD.cmd
-#from Conn2Center import Conn2Center
 import network.Conn2Center as Conn2Center
 Conn2Center = Conn2Center.Conn2Center
 
-#adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
-#adds_list = [('192.168.16.108', 18001)]
-adds_list = [('localhost', 8888)]
-adds = ('localhost', 8888)
-KEY = 'a780xx'
+# adds = ('localhost', 8888)
+# KEY = 'a780xx'
 CHANNEL_ID = 0
 CHANNEL_NAME = 'player'
 
@@ -44,6 +41,6 @@ def reg_cmd(conn):
     conn.hook_command(CMD["PLAYEROUT_CHECKPLAYER_ACK"], check_player) 
 
 if __name__ == '__main__':
-    conn = Conn2Center(adds, CHANNEL_ID, CHANNEL_NAME)
+    conn = Conn2Center(config.adds, CHANNEL_ID, CHANNEL_NAME)
     reg_cmd(conn)
     conn.start()

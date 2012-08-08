@@ -10,6 +10,7 @@ from gevent import event
 from gevent.queue import Queue
 from amfast.decoder import Decoder
 from amfast.encoder import Encoder
+import config.config as config
 from Callback import Callback
 import config.CMD as CMD
 CMD = CMD.cmd
@@ -17,7 +18,7 @@ CMD = CMD.cmd
 #adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
 #adds_list = [('192.168.16.108', 18001)]
 #adds_list = [('localhost', 8888)]
-KEY = 'a780xx'
+# KEY = 'a780xx'
 #CHANNEL_ID = 0
 #CHANNEL_NAME = 'player'
 
@@ -40,26 +41,25 @@ class Conn2Center(Callback):
 
     def verify(self):
         # [uint32 channel_id][string channel_name][string key]
-        print 'channel_name: ', self._channel_name 
-        print 'Key: ', KEY
-        fmt = '!II%ssI%ss' % (len(self._channel_name), len(KEY))
-        print len(self._channel_name), len(KEY)
-        veryfy_string = struct.pack(fmt, self._channel_id, len(self._channel_name), self._channel_name, len(KEY), KEY)
-
-        print 'veryfyString: ', repr(veryfy_string)
-        print 'len data: ', len(veryfy_string)
-
-
-        print "------------------------------------------------"
-        print "------------------------------------------------"
-        print "------------------------------------------------"
-        (channel_id, channel_name_len, channel_name, key_len, key) = struct.unpack(fmt, veryfy_string)
-        print 'channel_id: ', channel_id
-        print 'channel_name_len: ', channel_name_len
-        print 'channel_name: ', channel_name
-        print 'key_len: ', key_len
-        print 'key: ', key
-        self._sock.send(veryfy_string)
+		print 'channel_name: ', self._channel_name
+		KEY = config.KEY
+		print 'Key: ', KEY
+		fmt = '!II%ssI%ss' % (len(self._channel_name), len(KEY))
+		print len(self._channel_name), len(KEY)
+		veryfy_string = struct.pack(fmt, self._channel_id, len(self._channel_name), self._channel_name, len(KEY), KEY)
+		print 'veryfyString: ', repr(veryfy_string)
+		print 'len data: ', len(veryfy_string)
+		
+		print "------------------------------------------------"
+		print "------------------------------------------------"
+		print "------------------------------------------------"
+		(channel_id, channel_name_len, channel_name, key_len, key) = struct.unpack(fmt, veryfy_string)
+		print 'channel_id: ', channel_id
+		print 'channel_name_len: ', channel_name_len
+		print 'channel_name: ', channel_name
+		print 'key_len: ', key_len
+		print 'key: ', key
+		self._sock.send(veryfy_string)
 
     def getSock(self):
         return self._sock
