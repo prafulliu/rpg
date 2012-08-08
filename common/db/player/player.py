@@ -2,56 +2,54 @@
 #
 # created by: liup Pengfei
 
-import pymongo
 import os
 import time
 import config.playerconfig as playerconfig
-import csv
+import db.base.collection_name as collection_name
+import db.base.mongo_conn as mongo_conn
 
-#connection = pymongo.Connection('localhost', 27017)
-connection = pymongo.Connection()
-db = connection.rpg
-collection = db.player
+col_name = collection_name.PLAYER
+mongo_conn = mongo_conn.CMongoConn(col_name)
+collection = mongo_conn.get_collection()
 
 class CPlayer():
     #创建角色
     def __init__(self, name, camp, occupation, zone, passport_id):
-        self.passport_id      = passport_id
-        self.occupation       = occupation
-        self.create_time      = time.time() 
-        self.last_login_time  = 0
-        self.last_login_map   = 0
-        self.zone             = 0
-        self.cur_mapid        = 0
-        self.x                = 0
-        self.y                = 0
-        self.name             = name
+		self._id              = mongo_conn.get_aut_inc_pk().get_pk_by_name(col_name)
+		self.passport_id      = passport_id
+		self.occupation       = occupation
+		self.create_time      = time.time()
+		self.last_login_time  = 0
+		self.last_login_map   = 0
+		self.zone             = 0
+		self.cur_mapid        = 0
+		self.x                = 0
+		self.y                = 0
+		self.name             = name
 
         #self.sex              = 0 
         #self.head_cg          = 0 
         #self.look             = 0 
         #以上三项可以通过查CSV表实现
-
-        self.camp             = camp
-        self.lv               = 1
-        self.exp              = 0
-        self.exp_max          = 0
-        self.sp               = 0
-        self.sp_max           = 0
-        self.title            = []
-        self.title_now        = 0
-        self.silver_pack      = 0
-        self.silver_warehouse = 0
-        self.gold_pack        = 0
-        self.gold_warehouse   = 0
-        self.jade_pack        = 0
-        self.jade_warehouse   = 0
-        self.prepaid_score    = 0
-        self.activity_score   = 0
-        self.achieve_score    = 0
-        self.guild_score      = 0
-
-        collection.insert(vars(self))
+		self.camp             = camp
+		self.lv               = 1
+		self.exp              = 0
+		self.exp_max          = 0
+		self.sp               = 0
+		self.sp_max           = 0
+		self.title            = []
+		self.title_now        = 0
+		self.silver_pack      = 0
+		self.silver_warehouse = 0
+		self.gold_pack        = 0
+		self.gold_warehouse   = 0
+		self.jade_pack        = 0
+		self.jade_warehouse   = 0
+		self.prepaid_score    = 0
+		self.activity_score   = 0
+		self.achieve_score    = 0
+		self.guild_score      = 0
+		collection.insert(vars(self))
 
 def check_player(zone, passport_id, sitekey, sign):
     retVal = {}
@@ -95,13 +93,13 @@ def get_recommand_player_info():
     return retVal
         
 def check_name(name):
-    #检查用户名(name)
-    result = True
-    if name != None:
-        name_count = collection.find({'name':name}).count()
-        if name_count != 0:
-            result = False
-    return result
+	#检查用户名(name)
+	result = True
+	if name != None:
+		name_count = collection.find({'name':name}).count()
+		if name_count != 0:
+			result = False
+	return result
 
 def check_camp(camp):
     #检查阵营(camp)
@@ -158,11 +156,11 @@ def creat_player(name, camp, occupation, zone, passport_id):
     return retVal
 
 if __name__ == "__main__":
-    name          = 'lily'
+    name          = 'johnx'
     camp          = 1
     occupation    = 2
     zone          = 1
-    passport_id   = '2'
+    passport_id   = '4'
     #p = CPlayer(passport, name, camp, occupation)
     #r = checkPlayer(0, '1', 0, 0)
     #print r
