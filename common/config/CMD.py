@@ -15,16 +15,13 @@ def CMD(mod, name, val):
     noti_val  = ack_val + 0x00020000 
     
     cmd[ACK]  = ack_val
-    print 'ack_val: ', ack_val
     cmd[REP]  = rep_val
-    print 'rep_val: ', rep_val
     cmd[NOTI] = noti_val
-    print 'noti_val:', noti_val
 
 cmd = {}
 
-#if __name__ == "config.CMD":
-if __name__ == "common.config.CMD":
+if __name__ == "config.CMD":
+#if __name__ == "common.config.CMD":
 #if __name__ == "__main__":
     
     CMD("PLAYEROUT", "CHECKPLAYER", 1)

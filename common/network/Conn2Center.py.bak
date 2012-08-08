@@ -10,28 +10,27 @@ from gevent import event
 from gevent.queue import Queue
 from amfast.decoder import Decoder
 from amfast.encoder import Encoder
-from Callback import Callback
-import config.CMD as CMD
+from common.db.player import player
+import common.config.CMD as CMD
 CMD = CMD.cmd
 
 #adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
 #adds_list = [('192.168.16.108', 18001)]
-#adds_list = [('localhost', 8888)]
+adds_list = [('localhost', 8888)]
 KEY = 'a780xx'
-#CHANNEL_ID = 0
-#CHANNEL_NAME = 'player'
+CHANNEL_ID = 0
+CHANNEL_NAME = 'player'
 
-class Conn2Center(Callback):
+class pythonClient():
     def __init__(self, adds, channel_id, channel_name):
-        Callback.__init__(self)
         self._bufer = ''
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._channel_id = channel_id
         self._channel_name = channel_name
+        self._cmd2fun = {}
         self._rqstid = {}
 
         try:
-            print 'adds: ', adds
             self._sock.connect(adds)
             self.verify()
         except:
@@ -149,23 +148,59 @@ class Conn2Center(Callback):
                 decoder = Decoder(amf3=True)
                 data = decoder.decode(amf3_data)
                 print '>>>>>>>>>>>>>>>>>>>>>>>>>>> data: ', data
-                callback = self._callback[cmd]
-                callback(self, cmd, rqstid, data) 
+                cb_f = self._cmd2fun[cmd]
+                cb_f(self, cmd, rqstid, data) 
+
+    def hook_command(self, cmd, cb_f):
+        self._cmd2fun[cmd] = cb_f
+    
+    def cb(self, cmd, playerid):
+        cb_f = self._cmd2fun[cmd]
+        cb_f(playerid, pkt)
 
     def send_rsp(self, cmd, playerid, rqstid, pkt):
         encoder = Encoder(amf3=True)
         amf3_data = encoder.encode(pkt)
         self.forwardMsg(amf3_data, playerid, rqstid, flag = 0)
 
-    def start(self):
-        print 'called start'
-        while 1:
-            data, address = self.getSock().recvfrom(8192)
-            print 'data: ', repr(data)
-            if data:
-                gevent.spawn(self.dataReceived, data)
-                print "job's done"
-            else:
-                self.getSock().close()
-                break 
+def creat_player(conn, playerid, rqstid, pkt):
+    retVal = player.creat_player(pkt["name"], pkt["camp"], pkt["occupation"],
+                                 pkt["zone"], pkt["passport_id"])
+    conn.send_rsp(CMD["PLAYEROUT_CREATEPLAYER_REP"], playerid, rqstid, retVal) 
+
+def get_recommand_player_info(conn, playerid, rqstid, pkt):
+    retVal = player.get_recommand_player_info()
+    conn.send_rsp(CMD["PLAYEROUT_GETRECOMMANDPLAYERINFO_REP"], playerid,
+                  rqstid, retVal)
+
+def check_player(conn, playerid, rqstid, pkt):
+    retVal = player.check_player(pkt["zone"], pkt["passport_id"], pkt["sitekey"], pkt["sign"])
+    conn.send_rsp(CMD["PLAYEROUT_CHECKPLAYER_REP"], playerid, rqstid, retVal)
+
+def recvAndDataReceived(adds):
+    p = pythonClient(adds, CHANNEL_ID, CHANNEL_NAME)
+    #p.getSock().settimeout(20)
+
+    p.hook_command(CMD["PLAYEROUT_CREATEPLAYER_ACK"], creat_player)
+
+    p.hook_command(CMD["PLAYEROUT_GETRECOMMANDPLAYERINFO_ACK"], get_recommand_player_info)
+
+    p.hook_command(CMD["PLAYEROUT_CHECKPLAYER_ACK"], check_player) 
+
+    while True:
+        data, address = p.getSock().recvfrom(8192)
+        print 'data: ', repr(data)
+        if data:
+            gevent.spawn(p.dataReceived, data)
+            print "job's done"
+        else:
+            p.getSock().close()
+            break 
+
+def analyze():
+    jobs = [gevent.spawn(recvAndDataReceived, adds) for adds in adds_list]
+    gevent.joinall(jobs)
+
+if __name__ == '__main__':
+    analyze()
 
