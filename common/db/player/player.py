@@ -5,7 +5,7 @@
 import pymongo
 import os
 import time
-import playerconfig
+import config.playerconfig as playerconfig
 import csv
 
 #connection = pymongo.Connection('localhost', 27017)
