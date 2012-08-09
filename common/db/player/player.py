@@ -5,14 +5,13 @@
 import os
 import time
 import config.playerconfig as playerconfig
-import db.base.collection_name as collection_name
-import db.base.mongo_conn as mongo_conn
+import db.base.mongo_conf as mongo_conf
 import config.mapconfig as mapconfig
+from db.base.DataBaseAccess import DataBaseAccess
 
-col_name = collection_name.PLAYER
-mongo_conn = mongo_conn.CMongoConn(col_name)
-collection = mongo_conn.get_collection()
-
+rpg_access = DataBaseAccess(mongo_conf.ADDRESS, mongo_conf.PORT,
+                          mongo_conf.DB_RPG)
+COL_PLAYER = mongo_conf.PLAYER
 class CPlayer():
     #创建角色
     def __init__(self, name, camp, occupation, zone, passport_id):
@@ -95,7 +94,7 @@ class CPlayer():
 		self.rig_def                 = 0
 		self.energy                  = 0
 
-		collection.insert(vars(self))
+		rpg_access.insert(COL_PLAYER, vars(self))
 
 def check_player(zone, passport_id, sitekey, sign):
     retVal = {}
@@ -141,7 +140,7 @@ def check_name(name):
 	#检查用户名(name)
 	result = True
 	if name != None:
-		name_count = collection.find({'name':name}).count()
+		name_count = rpg_access.query(COL_PLAYER, {'name':name}).count()
 		if name_count != 0:
 			result = False
 	return result
@@ -171,7 +170,7 @@ def check_passport_id(passport_id):
     #检查账号名称(passport_id)
     result = False
     if passport_id != None:
-        passport_id_count = collection.find({'passport_id':passport_id}).count()
+        passport_id_count = rpg_access.query(COL_PLAYER, {'passport_id':passport_id}).count()
         if passport_id_count < playerconfig.MAX_PLAYER_CREATED:
             result = True
     return result
@@ -250,11 +249,11 @@ if __name__ == "__main__":
 
     #checkName('lily')
     
-    #r = creat_player(name, camp, occupation, zone, passport_id)
+    r = creat_player(name, camp, occupation, zone, passport_id)
     #r = check_player(zone, passport_id, sitekey, sign)
     #print r['value']['player']['name']
-    #print r
-    data = {'name':'草'}
-    print data
-    collection.insert(data)
+    print r
+    #data = {'name':'草'}
+    #print data
+    #rpg_access.insert(COL_PLAYER, data)
     

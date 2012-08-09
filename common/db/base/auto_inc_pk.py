@@ -1,37 +1,28 @@
 # -*- coding: utf-8 -*
-import pymongo
-connection = pymongo.Connection()
-db = connection.rpg
-collection = db.auto_inc_pk
+from db.base.DataBaseAccess import DataBaseAccess
+import db.base.mongo_conf as mongo_conf
 
-class CAutoIncPk():
-	def __init__(self, table_name, pk=0):
-		if self.is_existed(table_name):
-			pass
-		else:
-			self.table_name = table_name
-			self.pk         = pk
-			collection.insert(vars(self))
-			
-	def is_existed(self, table_name):
-		result = False
-		if table_name:
-			table = collection.find_one({"table_name":table_name})
-			if table:
-				result = True
-		return result
-	
-	def get_pk_by_name(self, table_name):
-		pk = None
-		if table_name:
-			table = collection.find_one({"table_name":table_name})
-			if table:
-				pk =  table["pk"]
-				table["pk"] = table["pk"] + 1
-				collection.save(table)
-		return pk
+server_access = DataBaseAccess(mongo_conf.ADDRESS, mongo_conf.PORT,
+                                                      mongo_conf.DB_SERVER)
+COL_AUTO_INC_PK = mongo_conf.AUTO_INC_PK
+
+def get_pk_by_name(col_name):
+    if not col_name: raise AssertionError('col_name should not be None')
+    col = server_access.query_one(COL_AUTO_INC_PK, {'_id':'identity_key'})
+    if col:
+        #try:
+        print 'right'
+        pk = col[col_name]
+        col[col_name] = col[col_name] + 1
+        server_access.insert(COL_AUTO_INC_PK, col)
+        #except:
+        #    print 'error'
+        #    server_access.insert(COL_AUTO_INC_PK, {'_id':'identity_key', col_name:0})
+        #    pk = 0
+    print 'p', pk
+    return pk
 
 if __name__ == "__main__":
-	table_name = 'item'
-	t = AutoIncPk(table_name)
-	#print get_pk_by_name(table_name)
+	col_name = 'player'
+	#col_name = None
+	print get_pk_by_name(col_name)
