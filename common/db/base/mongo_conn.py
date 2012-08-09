@@ -4,6 +4,7 @@ import db.base.auto_inc_pk as auto_inc_pk
 import db.base.collection_name as collection_name
 
 class CMongoConn():
+	#def __init__(self, col, db=collection_name.DB, ip='192.168.16.99', port=27017):
 	def __init__(self, col, db=collection_name.DB, ip='localhost', port=27017):
 		self._dbconn = pymongo.Connection(ip, port)
 		self._db = self._dbconn[db]

@@ -7,6 +7,7 @@ import time
 import config.playerconfig as playerconfig
 import db.base.collection_name as collection_name
 import db.base.mongo_conn as mongo_conn
+import config.mapconfig as mapconfig
 
 col_name = collection_name.PLAYER
 mongo_conn = mongo_conn.CMongoConn(col_name)
@@ -22,9 +23,9 @@ class CPlayer():
 		self.last_login_time         = 0
 		self.last_login_map          = 0
 		self.zone                    = 0
-		self.mapid                   = 0
-		self.x                       = 0
-		self.y                       = 0
+		self.mapid                   = mapconfig.INIT_MAPID
+		self.x                       = mapconfig.X
+		self.y                       = mapconfig.Y
 		self.name                    = name
 
 		self.camp                    = camp
@@ -74,10 +75,10 @@ class CPlayer():
 		self.physical_def            = 0
 		self.magic_def               = 0
 
-		self.hp                      = 0
-		self.hp_max                  = 0
-		self.mp                      = 0
-		self.mp_max                  = 0
+		self.hp                      = playerconfig.INIT_HP
+		self.hp_max                  = playerconfig.INIT_HP 
+		self.mp                      = playerconfig.INIT_MP
+		self.mp_max                  = playerconfig.INIT_MP
 		self.acc                     = 0
 		self.miss                    = 0
 		self.cri                     = 0
@@ -176,7 +177,7 @@ def check_passport_id(passport_id):
     return result
 
 def get_map_name(mapid):
-    map_name = ''
+    map_name = mapconfig.INIT_MAPNAME
     return map_name 
 
 def get_player_look(playerid):
@@ -192,7 +193,8 @@ def get_player_info(player):
     if player:
         player_info['playerid']   = player['_id']
         player_info['mapid']      = player['mapid']
-        player_info['map_name']   = get_map_name(player['mapid'])
+        map_name = get_map_name(player['mapid'])
+        player_info['map_name']   = map_name 
         player_info['x']          = player['x']
         player_info['y']          = player['y']
         player_info['name']       = player['name']
@@ -203,6 +205,7 @@ def get_player_info(player):
         player_info['hp_max']     = player['hp_max']
         player_info['mp']         = player['mp']
         player_info['mp_max']     = player['mp_max']
+        player_info['lv']         = player['lv']
     return player_info
 
 def creat_player(name, camp, occupation, zone, passport_id):
@@ -233,11 +236,12 @@ def creat_player(name, camp, occupation, zone, passport_id):
     return retVal
 
 if __name__ == "__main__":
-    name          = 'lily2'
+    name          = '哈哈'
+    print 'type name:', type(name)
     camp          = 1
     occupation    = 2
     zone          = 0
-    passport_id   = '22'
+    passport_id   = '1'
     sitekey       = 0
     sign          = 0   
     #p = CPlayer(passport, name, camp, occupation)
@@ -246,8 +250,11 @@ if __name__ == "__main__":
 
     #checkName('lily')
     
-    r = creat_player(name, camp, occupation, zone, passport_id)
-    print r
-   # r = check_player(zone, passport_id, sitekey, sign)
+    #r = creat_player(name, camp, occupation, zone, passport_id)
+    #r = check_player(zone, passport_id, sitekey, sign)
+    #print r['value']['player']['name']
     #print r
+    data = {'name':'草'}
+    print data
+    collection.insert(data)
     

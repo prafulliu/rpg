@@ -28,7 +28,7 @@ MSG_CHANNEL = 55555
 CMD         = 0x00000001
 CMD2         = 0x00000003 
 
-data = {"zone":0, "passport_id":1, "sitekey":0, "sign":0}
+data = {"zone":0, "passport_id":'1', "sitekey":0, "sign":0}
 AMF3_DATA = encoder.encode(data)
 
 data2 = {}

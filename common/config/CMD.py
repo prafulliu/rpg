@@ -24,6 +24,6 @@ if __name__ == "config.CMD":
 #if __name__ == "common.config.CMD":
 #if __name__ == "__main__":
     
-    CMD("PLAYEROUT", "CHECKPLAYER", 1)
-    CMD("PLAYEROUT", "GETRECOMMANDPLAYERINFO", 2)
-    CMD("PLAYEROUT", "CREATEPLAYER", 3)
+    CMD("PLAYEROUT", "CHECK_PLAYER", 				1)
+    CMD("PLAYEROUT", "GET_RECOMMAND_PLAYER_INFO",	2)
+    CMD("PLAYEROUT", "CREATE_PLAYER", 				3)

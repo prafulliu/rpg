@@ -26,3 +26,6 @@ OCCUPATION = [
                 5, #剑仙
               ]
 
+INIT_LV = 1
+INIT_HP = 700
+INIT_MP = 100
