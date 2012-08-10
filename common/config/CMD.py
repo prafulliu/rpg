@@ -3,7 +3,7 @@
 CAT_PLAYER = 0x00000001
 
 
-def CMD(mod, name, val):
+def cmd(mod, name, val):
     ACK  = "%s_%s_ACK" % (mod, name)
     REP  = "%s_%s_REP" % (mod, name)
     NOTI = "%s_%s_NOTI" % (mod, name)
@@ -20,10 +20,10 @@ def CMD(mod, name, val):
 
 cmd = {}
 
-if __name__ == "config.CMD":
-#if __name__ == "common.config.CMD":
+if __name__ == "config.cmd":
+#if __name__ == "common.config.cmd":
 #if __name__ == "__main__":
     
-    CMD("PLAYEROUT", "CHECK_PLAYER", 				1)
-    CMD("PLAYEROUT", "GET_RECOMMAND_PLAYER_INFO",	2)
-    CMD("PLAYEROUT", "CREATE_PLAYER", 				3)
+    cmd("PLAYEROUT", "CHECK_PLAYER", 				1)
+    cmd("PLAYEROUT", "GET_RECOMMAND_PLAYER_INFO",	2)
+    cmd("PLAYEROUT", "CREATE_PLAYER", 				3)

@@ -1,1 +1,6 @@
-simple server
+
+set PYTHONPATH rpg\common
+
+run python player/player.py
+
+
