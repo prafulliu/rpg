@@ -11,9 +11,9 @@ from gevent.queue import Queue
 from amfast.decoder import Decoder
 from amfast.encoder import Encoder
 import config.config as config
-from callback import callback
-import config.cmd as cmd
-cmd = cmd.cmd
+from Callback import Callback
+import config.CMD as CMD
+CMD = CMD.cmd
 
 #adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
 #adds_list = [('192.168.16.108', 18001)]
@@ -22,9 +22,9 @@ cmd = cmd.cmd
 #CHANNEL_ID = 0
 #CHANNEL_NAME = 'player'
 
-class conn2center(callback):
+class Conn2Center(Callback):
     def __init__(self, adds, channel_id, channel_name):
-        callback.__init__(self)
+        Callback.__init__(self)
         self._bufer = ''
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._channel_id = channel_id
@@ -61,30 +61,33 @@ class conn2center(callback):
 		print 'key: ', key
 		self._sock.send(veryfy_string)
 
-    def get_sock(self):
+    def getSock(self):
         return self._sock
 
-    def parse_head(self, msg):
+    def parseHead(self, msg):
         print 'msg: >>>>>>>>>>>>>>>>>>', repr(msg)
         (msg_type, channel_id, command_id, data_length) = struct.unpack('BBHI',msg)
         return msg_type, channel_id, command_id, data_length
 
-    def get_data_length(self, msg):
-        (msg_type, channel_id, command_id, data_length) = self.parse_head(msg)
+    def parseBody(self, msg):
+        pass
+
+    def getDataLength(self, msg):
+        (msg_type, channel_id, command_id, data_length) = self.parseHead(msg)
         return data_length
 
-    def get_amf3_fmt(self, amf3_data):
+    def getAMF3_fmt(self, amf3_data):
         fmt = '!I%ss' % (len(amf3_data))
         return fmt
     
-    def forward_msg(self, amf3_data, playerid, rqstid, flag, playerid_list=[]): 
-    #def forward_msg(self, flag, playerid_list=[], msg_channel, cmd, amf3_data): 
-        #[uint8_t flag][uint32_t target_len][target_players][uint8_t ch='\0'][uint16_t msg_channel][uint16_t cmd][string amf3_data]
+    def forwardMsg(self, amf3_data, playerid, rqstid, flag, playerid_list=[]): 
+    #def forwardMsg(self, flag, playerid_list=[], msg_channel, cmd, amf3_data): 
+        #[uint8_t flag][uint32_t targetLen][target_players][uint8_t ch='\0'][uint16_t msg_channel][uint16_t cmd][string amf3_data]
         
         msg_channel = self._rqstid[rqstid]['msg_channel']
         cmd = self._rqstid[rqstid]['cmd']
         target_players = ''
-        target_len = 1
+        targetLen = 1
         seperator = '\0'
         playerid_list = []
 
@@ -104,23 +107,23 @@ class conn2center(callback):
             return
 
         print 'target_players: ', repr(target_players)
-        target_len += len(target_players)
-        print 'target_len: ', target_len
-        replyMsg = struct.pack("!BI", flag, target_len)
+        targetLen += len(target_players)
+        print 'targetLen: ', targetLen
+        replyMsg = struct.pack("!BI", flag, targetLen)
         replyMsg += target_players 
         print 'type: ', type(seperator)
         replyMsg += struct.pack("!sHH", seperator, msg_channel, cmd)
-        replyMsg += struct.pack(self.get_amf3_fmt(amf3_data), len(amf3_data), amf3_data)
-        print 'amf3_data: ', repr(struct.pack(self.get_amf3_fmt(amf3_data),len(amf3_data), amf3_data))
+        replyMsg += struct.pack(self.getAMF3_fmt(amf3_data), len(amf3_data), amf3_data)
+        print 'amf3_data: ', repr(struct.pack(self.getAMF3_fmt(amf3_data),len(amf3_data), amf3_data))
         print 'replyMsg: ', repr(replyMsg)
 
         print '-------------------------------------------------'
-        (flag, target_len) = struct.unpack("!BI", replyMsg[0:5])
+        (flag, targetLen) = struct.unpack("!BI", replyMsg[0:5])
         print 'flag: ', flag 
-        print 'target_len: ', target_len
+        print 'targetLen: ', targetLen
         self._sock.send(replyMsg)
 
-    def data_received(self, data):
+    def dataReceived(self, data):
         self._bufer = self._bufer + data
         #[uint32_t playerid][uint16_t msg_channel][uint16_t cmd][string amf3_data]
 
@@ -142,7 +145,7 @@ class conn2center(callback):
                 (amf3_data,) = struct.unpack(amf3_data_fmt, self._bufer[12:12+amf3_data_len])
                 print '>>>>>>>>>>>>>>>>>>>>>>>>>>>> amf3_data: ', repr(amf3_data)
                 self._bufer = self._bufer[12+amf3_data_len:]
-                #self.forward_msg(amf3_data)
+                #self.forwardMsg(amf3_data)
                 decoder = Decoder(amf3=True)
                 data = decoder.decode(amf3_data)
                 print '>>>>>>>>>>>>>>>>>>>>>>>>>>> data: ', data
@@ -152,17 +155,17 @@ class conn2center(callback):
     def send_rsp(self, cmd, playerid, rqstid, pkt):
         encoder = Encoder(amf3=True)
         amf3_data = encoder.encode(pkt)
-        self.forward_msg(amf3_data, playerid, rqstid, flag = 0)
+        self.forwardMsg(amf3_data, playerid, rqstid, flag = 0)
 
     def start(self):
         print 'called start'
         while 1:
-            data, address = self.get_sock().recvfrom(8192)
+            data, address = self.getSock().recvfrom(8192)
             print 'data: ', repr(data)
             if data:
-                gevent.spawn(self.data_received, data)
+                gevent.spawn(self.dataReceived, data)
                 print "job's done"
             else:
-                self.get_sock().close()
+                self.getSock().close()
                 break 
 
