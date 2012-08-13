@@ -115,7 +115,7 @@ class CConn2Center(CCallback):
         (flag, targetLen) = struct.unpack("!BI", replyMsg[0:5])
         print 'flag: ', flag 
         print 'targetLen: ', targetLen
-        self._sock.send(replyMsg)
+        print 'send sock ==================>>>>>>>>>>', self._sock.send(replyMsg)
 
     def dataReceived(self, data):
         self._bufer = self._bufer + data

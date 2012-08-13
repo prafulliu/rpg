@@ -27,6 +27,7 @@ class CPlayer():
 		self.mapid                   = mapconfig.INIT_MAPID
 		self.x                       = mapconfig.X
 		self.y                       = mapconfig.Y
+		self.dir                     = mapconfig.DOWN
 		self.name                    = name
 
 		self.camp                    = camp
@@ -198,6 +199,7 @@ def get_player_info(player):
         player_info['map_name']   = map_name 
         player_info['x']          = player['x']
         player_info['y']          = player['y']
+        player_info['dir']        = player['dir']
         player_info['name']       = player['name']
         player_info['look']       = get_player_look(player['_id'])
         player_info['occupation'] = player['occupation']
