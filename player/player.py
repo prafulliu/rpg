@@ -49,6 +49,7 @@ def reg_cmd(conn):
 	conn.hook_command(CMD["PLAYER_CHECK_PLAYER_ACK"], check_player) 
 
 if __name__ == '__main__':
-    conn = CConn2Center(config.adds, CHANNEL_ID, CHANNEL_NAME)
-    reg_cmd(conn)
-    conn.start()
+	print CMD["PLAYER_CHECK_PLAYER_REP"]
+	conn = CConn2Center(config.adds, CHANNEL_ID, CHANNEL_NAME)
+	reg_cmd(conn)
+	conn.start()
