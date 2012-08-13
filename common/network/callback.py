@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-class Callback():
+class CCallback():
     def __init__(self):
         self._callback = {}
 

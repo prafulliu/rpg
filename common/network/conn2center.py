@@ -2,7 +2,6 @@
 import struct
 import gevent
 import sys
-import ctypes
 import uuid
 
 from gevent import socket
@@ -11,9 +10,7 @@ from gevent.queue import Queue
 from amfast.decoder import Decoder
 from amfast.encoder import Encoder
 import config.config as config
-from Callback import Callback
-import config.CMD as CMD
-CMD = CMD.cmd
+from callback import CCallback
 
 #adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
 #adds_list = [('192.168.16.108', 18001)]
@@ -22,9 +19,9 @@ CMD = CMD.cmd
 #CHANNEL_ID = 0
 #CHANNEL_NAME = 'player'
 
-class Conn2Center(Callback):
+class CConn2Center(CCallback):
     def __init__(self, adds, channel_id, channel_name):
-        Callback.__init__(self)
+        CCallback.__init__(self)
         self._bufer = ''
         self._sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self._channel_id = channel_id
@@ -61,27 +58,24 @@ class Conn2Center(Callback):
 		print 'key: ', key
 		self._sock.send(veryfy_string)
 
-    def getSock(self):
+    def get_sock(self):
         return self._sock
 
-    def parseHead(self, msg):
+    def parse_head(self, msg):
         print 'msg: >>>>>>>>>>>>>>>>>>', repr(msg)
         (msg_type, channel_id, command_id, data_length) = struct.unpack('BBHI',msg)
         return msg_type, channel_id, command_id, data_length
 
-    def parseBody(self, msg):
-        pass
-
-    def getDataLength(self, msg):
-        (msg_type, channel_id, command_id, data_length) = self.parseHead(msg)
+    def get_data_length(self, msg):
+        (msg_type, channel_id, command_id, data_length) = self.parse_head(msg)
         return data_length
 
-    def getAMF3_fmt(self, amf3_data):
+    def get_amf3_fmt(self, amf3_data):
         fmt = '!I%ss' % (len(amf3_data))
         return fmt
     
-    def forwardMsg(self, amf3_data, playerid, rqstid, flag, playerid_list=[]): 
-    #def forwardMsg(self, flag, playerid_list=[], msg_channel, cmd, amf3_data): 
+    def forward_msg(self, amf3_data, playerid, rqstid, flag, playerid_list=[]): 
+    #def forward_msg(self, flag, playerid_list=[], msg_channel, cmd, amf3_data): 
         #[uint8_t flag][uint32_t targetLen][target_players][uint8_t ch='\0'][uint16_t msg_channel][uint16_t cmd][string amf3_data]
         
         msg_channel = self._rqstid[rqstid]['msg_channel']
@@ -113,8 +107,8 @@ class Conn2Center(Callback):
         replyMsg += target_players 
         print 'type: ', type(seperator)
         replyMsg += struct.pack("!sHH", seperator, msg_channel, cmd)
-        replyMsg += struct.pack(self.getAMF3_fmt(amf3_data), len(amf3_data), amf3_data)
-        print 'amf3_data: ', repr(struct.pack(self.getAMF3_fmt(amf3_data),len(amf3_data), amf3_data))
+        replyMsg += struct.pack(self.get_amf3_fmt(amf3_data), len(amf3_data), amf3_data)
+        print 'amf3_data: ', repr(struct.pack(self.get_amf3_fmt(amf3_data),len(amf3_data), amf3_data))
         print 'replyMsg: ', repr(replyMsg)
 
         print '-------------------------------------------------'
@@ -145,7 +139,7 @@ class Conn2Center(Callback):
                 (amf3_data,) = struct.unpack(amf3_data_fmt, self._bufer[12:12+amf3_data_len])
                 print '>>>>>>>>>>>>>>>>>>>>>>>>>>>> amf3_data: ', repr(amf3_data)
                 self._bufer = self._bufer[12+amf3_data_len:]
-                #self.forwardMsg(amf3_data)
+                #self.forward_msg(amf3_data)
                 decoder = Decoder(amf3=True)
                 data = decoder.decode(amf3_data)
                 print '>>>>>>>>>>>>>>>>>>>>>>>>>>> data: ', data
@@ -155,17 +149,17 @@ class Conn2Center(Callback):
     def send_rsp(self, cmd, playerid, rqstid, pkt):
         encoder = Encoder(amf3=True)
         amf3_data = encoder.encode(pkt)
-        self.forwardMsg(amf3_data, playerid, rqstid, flag = 0)
+        self.forward_msg(amf3_data, playerid, rqstid, flag = 0)
 
     def start(self):
         print 'called start'
         while 1:
-            data, address = self.getSock().recvfrom(8192)
+            data, address = self.get_sock().recvfrom(8192)
             print 'data: ', repr(data)
             if data:
                 gevent.spawn(self.dataReceived, data)
                 print "job's done"
             else:
-                self.getSock().close()
+                self.get_sock().close()
                 break 
 

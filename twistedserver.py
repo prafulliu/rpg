@@ -26,13 +26,16 @@ PLAYER_ID = 1000000000
 MSG_CHANNEL = 55555
 
 CMD         = 0x00000001
-CMD2         = 0x00000003 
+CMD         = 0x00000002
+CMD         = 0x00000003 
 
 data = {"zone":0, "passport_id":'1', "sitekey":0, "sign":0}
+data = {}
+data = {"name":"james", "camp":2, "occupation":1, "zone":1,
+		"passport_id":"lpf"}
+
 AMF3_DATA = encoder.encode(data)
 
-data2 = {}
-AMF3_DATA_2 = encoder.encode(data2)
 send_fmt = '!IHHI%ss' % (len(AMF3_DATA ))
 
 def get_send_fmt(amf3_data):

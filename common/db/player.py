@@ -101,7 +101,7 @@ class CPlayer():
 def check_player(zone, passport_id, sitekey, sign):
     retVal = {}
     if zone in playerconfig.ZONE:
-        player = collection.find_one({"passport_id":passport_id, "zone":zone})
+        player = rpg_access.query_one(COL_PLAYER, {"passport_id":passport_id, "zone":zone})
         value = {}
         if player:
             player_info = get_player_info(player)

@@ -28,9 +28,9 @@ class CAutoIncPk():
 				col[col_name] = 0
 				self._col.save(col)
 				pk = 0
-		print 'pk: ', pk
 		return pk
     
 if __name__ == "__main__":
+	col_name = 'main'
 	c = CAutoIncPk(mongoconf.IP, mongoconf.PORT, mongoconf.DB_SERVER, mongoconf.COL_AUTO_INC_PK)
 	print c.get_pk_by_name(col_name)
