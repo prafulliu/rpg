@@ -21,8 +21,8 @@ CConn2Center = conn2center.CConn2Center
 CHANNEL_ID = 0
 CHANNEL_NAME = 'player'
 
-def creat_player(conn, playerid, rqstid, pkt):
-	retVal = player.creat_player(pkt["name"], pkt["camp"], pkt["occupation"], pkt["zone"], pkt["passport_id"])
+def create_player(conn, playerid, rqstid, pkt):
+	retVal = player.create_player(pkt["name"], pkt["camp"], pkt["occupation"], pkt["passport_id"])
 	print "send data back ----------------->"
 	print "playerid: ", playerid
 	print "retVal: ", retVal
@@ -44,7 +44,7 @@ def check_player(conn, playerid, rqstid, pkt):
 
 def reg_cmd(conn):
 	print cmd
-	conn.hook_command(CMD["PLAYER_CREATE_PLAYER_ACK"], creat_player)
+	conn.hook_command(CMD["PLAYER_CREATE_PLAYER_ACK"], create_player)
 	conn.hook_command(CMD["PLAYER_GET_RECOMMAND_PLAYER_INFO_ACK"], get_recommand_player_info)
 	conn.hook_command(CMD["PLAYER_CHECK_PLAYER_ACK"], check_player) 
 

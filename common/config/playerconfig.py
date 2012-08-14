@@ -5,9 +5,7 @@
 MAX_PLAYER_CREATED = 1
 
 #服务器
-ZONE = [
-		0
-		]
+ZONE = 0 
 
 #阵营
 CAMP = [

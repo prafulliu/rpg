@@ -25,14 +25,13 @@ PLAYER_ID = 1000000000
 #  'H' format requires 0 <= number <= 65535
 MSG_CHANNEL = 55555
 
-CMD		= 0x00000001
-#CMD	 = 0x00000002
+#CMD		= 0x00000001
+CMD	 = 0x00000002
 #CMD	 = 0x00000003 
 
 data = {"zone":0, "passport_id":'2', "sitekey":0, "sign":0}
-#data = {}
-#data = {"name":"james", "camp":2, "occupation":1, "zone":1,
-		#"passport_id":"lpf"}
+data = {}
+#data = {"name":"james", "camp":2, "occupation":1, "passport_id":"lpf"}
 
 AMF3_DATA = encoder.encode(data)
 
