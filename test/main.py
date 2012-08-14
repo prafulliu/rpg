@@ -1,10 +1,6 @@
-from log.playerlog import LOG
-#LOG = playerlog.LOG
+from log.log import LOG, TYPE
 
 
-#from playerlog import LOG
 
+LOG.setLevel(TYPE.INFO)
 LOG.info("this is a log")
-
-
-
