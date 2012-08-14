@@ -11,6 +11,8 @@ from amfast.decoder import Decoder
 from amfast.encoder import Encoder
 import config.config as config
 from callback import CCallback
+import util.pattern as pattern
+import util.check as check
 
 #adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
 #adds_list = [('192.168.16.108', 18001)]
@@ -126,7 +128,7 @@ class CConn2Center(CCallback):
 			(playerid, msg_channel, cmd, amf3_data_len) = struct.unpack("!IHHI", self._bufer[0:12])
 			print 'playerid: ', playerid
 			print 'msg_channel: ', msg_channel
-			print 'cmd: ', cmd
+			print 'cmd: ', pattern.to_hex(cmd)
 			print 'amf3_data_len: ', amf3_data_len
 			print 'type: ', type(amf3_data_len)
 			amf3_data_fmt = '!%ss' % (amf3_data_len)
@@ -143,8 +145,12 @@ class CConn2Center(CCallback):
 				decoder = Decoder(amf3=True)
 				data = decoder.decode(amf3_data)
 				print '>>>>>>>>>>>>>>>>>>>>>>>>>>> data: ', data
-				callback = self._callback[cmd]
-				callback(self, playerid, rqstid, data) 
+				try:
+					callback = self._callback[cmd]
+					callback(self, playerid, rqstid, data) 
+				except KeyError:
+					print "[warning]	CMD error. The CMD: %s cant not be handled" % (pattern.to_hex(cmd))
+					break
 
 	def send_rsp(self, cmd, playerid, rqstid, pkt):
 		encoder = Encoder(amf3=True)
