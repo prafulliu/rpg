@@ -13,13 +13,7 @@ import config.config as config
 from callback import CCallback
 import util.pattern as pattern
 import util.check as check
-
-#adds = [('localhost', 8888), ('localhost', 8889), ('localhost', 8890)]
-#adds_list = [('192.168.16.108', 18001)]
-#adds_list = [('localhost', 8888)]
-# KEY = 'a780xx'
-#CHANNEL_ID = 0
-#CHANNEL_NAME = 'player'
+from log.log import LOG, TYPE
 
 class CConn2Center(CCallback):
 	def __init__(self, adds, channel_id, channel_name):
@@ -30,41 +24,30 @@ class CConn2Center(CCallback):
 		self._channel_name = channel_name
 		self._rqstid = {}
 
-		try:
-			print 'adds: ', adds
-			self._sock.connect(adds)
-			self.verify()
-		except:
-			print "connected failed"
-			sys.exit(0)
+		self._sock.connect(adds)
+		self.verify()
+
+	#	try:
+	#		self._sock.connect(adds)
+	#		self.verify()
+	#	except:
+	#		LOG.info("connected failed")
+	#		sys.exit(0)
 
 	def verify(self):
 		# [uint32 channel_id][string channel_name][string key]
-		print 'channel_name: ', self._channel_name
-		KEY = config.KEY
-		print 'Key: ', KEY
-		fmt = '!II%ssI%ss' % (len(self._channel_name), len(KEY))
-		print len(self._channel_name), len(KEY)
-		veryfy_string = struct.pack(fmt, self._channel_id, len(self._channel_name), self._channel_name, len(KEY), KEY)
-		print 'veryfyString: ', repr(veryfy_string)
-		print 'len data: ', len(veryfy_string)
-		
-		print "------------------------------------------------"
-		print "------------------------------------------------"
-		print "------------------------------------------------"
-		(channel_id, channel_name_len, channel_name, key_len, key) = struct.unpack(fmt, veryfy_string)
-		print 'channel_id: ', channel_id
-		print 'channel_name_len: ', channel_name_len
-		print 'channel_name: ', channel_name
-		print 'key_len: ', key_len
-		print 'key: ', key
+		LOG.info("channel_id: %s, channel_name_len: %s, channel_name: %s, config.KEY:\
+			%s" % (self._channel_id, len(self._channel_name), self._channel_name, config.KEY))
+		fmt = '!II%ssI%ss' % (len(self._channel_name), len(config.KEY))
+		veryfy_string = struct.pack(fmt, self._channel_id,\
+			len(self._channel_name), self._channel_name, len(config.KEY), config.KEY)
+		LOG.info('veryfyString: %s' % (repr(veryfy_string)))
 		self._sock.send(veryfy_string)
 
 	def get_sock(self):
 		return self._sock
 
 	def parse_head(self, msg):
-		print 'msg: >>>>>>>>>>>>>>>>>>', repr(msg)
 		(msg_type, channel_id, command_id, data_length) = struct.unpack('BBHI',msg)
 		return msg_type, channel_id, command_id, data_length
 
@@ -77,11 +60,12 @@ class CConn2Center(CCallback):
 		return fmt
 	
 	def forward_msg(self, cmd, amf3_data, playerid, rqstid, flag, playerid_list=[]): 
-	#def forward_msg(self, flag, playerid_list=[], msg_channel, cmd, amf3_data): 
-		#[uint8_t flag][uint32_t targetLen][target_players][uint8_t ch='\0'][uint16_t msg_channel][uint16_t cmd][string amf3_data]
+		#[uint8_t flag][uint32_t targetLen][target_players][uint8_t ch='\0']\
+		#[uint16_t msg_channel][uint16_t cmd][string amf3_data]
 		msg_channel = self._rqstid[rqstid]['msg_channel']
-		print 'cmd ---- -------------------------------------------', cmd
-		print 'msg_channel ----------------------------------------', msg_channel
+		LOG.info("cmd: %s, amf3_data: %s, playerid: %s, rqstid: %s, flag: %s,\
+			playerid_list: %s" % (pattern.to_hex(cmd), repr(amf3_data), playerid,\
+			rqstid, flag, playerid_list))
 		target_players = ''
 		targetLen = 1
 		seperator = '\0'
@@ -93,7 +77,7 @@ class CConn2Center(CCallback):
 			playerid_list = list(set(playerid_list).union(_playerid))
 			for i in xrange(len(playerid_list)):
 				target_players += struct.pack('!I', playerid_list[i])
-			print 'len(playerid_list): ', len(playerid_list)
+			LOG.info('len(playerid_list): %s' % (len(playerid_list)))
 		elif flag == 1:
 			pass
 		elif flag == 2:
@@ -101,36 +85,30 @@ class CConn2Center(CCallback):
 		else:
 			return
 		
-		print 'target_players: ', repr(target_players)
+		LOG.debug('target_players: %s' % (repr(target_players)))
 		targetLen += len(target_players)
-		print 'targetLen: ', targetLen
+		LOG.debug('targetLen: %s' % (targetLen))
 		replyMsg = struct.pack("!BI", flag, targetLen)
 		replyMsg += target_players
-		print 'type: ', type(seperator)
 		replyMsg += struct.pack("!sI", seperator, cmd)
 		replyMsg += struct.pack(self.get_amf3_fmt(amf3_data), len(amf3_data), amf3_data)
-		print '-------------------------------------- len(amf3_data)', len(amf3_data)
-		print 'amf3_data: ', repr(struct.pack(self.get_amf3_fmt(amf3_data),len(amf3_data), amf3_data))
-		print 'replyMsg: ', repr(replyMsg)
-		
-		print '-------------------------------------------------'
-		(flag, targetLen) = struct.unpack("!BI", replyMsg[0:5])
-		print 'flag: ', flag 
-		print 'targetLen: ', targetLen
-		print 'send sock ==================>>>>>>>>>>', self._sock.send(replyMsg)
+		LOG.info('len(amf3_data): %s' % (len(amf3_data)))
+		LOG.info('amf3_data: %s' %
+		(repr(struct.pack(self.get_amf3_fmt(amf3_data),len(amf3_data),
+		amf3_data))))
+		LOG.info('replyMsg: %s' % (repr(replyMsg)))
+		data_count = self._sock.send(replyMsg)
+		LOG.info('send %s data' % (data_count))
 
 	def dataReceived(self, data):
 		self._bufer = self._bufer + data
 		#[uint32_t playerid][uint16_t msg_channel][uint16_t cmd][string amf3_data]
 
-		print 'len data: ', len(data)
+		LOG.info('len data: %s' % (len(data)))
 		while(len(self._bufer) >= 12):
 			(playerid, msg_channel, cmd, amf3_data_len) = struct.unpack("!IHHI", self._bufer[0:12])
-			print 'playerid: ', playerid
-			print 'msg_channel: ', msg_channel
-			print 'cmd: ', pattern.to_hex(cmd)
-			print 'amf3_data_len: ', amf3_data_len
-			print 'type: ', type(amf3_data_len)
+			LOG.info("playerid: %s, msg_channel: %s, cmd: %s, amf3_data_len:\
+				%s" % (playerid, msg_channel, pattern.to_hex(cmd), amf3_data_len,))
 			amf3_data_fmt = '!%ss' % (amf3_data_len)
 			if (len(self._bufer[12:]) >= amf3_data_len):
 				rqstid = uuid.uuid1()
@@ -139,17 +117,17 @@ class CConn2Center(CCallback):
 										'playerid':playerid,
 										'cmd':cmd}
 				(amf3_data,) = struct.unpack(amf3_data_fmt, self._bufer[12:12+amf3_data_len])
-				print '>>>>>>>>>>>>>>>>>>>>>>>>>>>> amf3_data: ', repr(amf3_data)
+				LOG.info("amf3_data: %s" % repr(amf3_data))
 				self._bufer = self._bufer[12+amf3_data_len:]
-				#self.forward_msg(amf3_data)
 				decoder = Decoder(amf3=True)
 				data = decoder.decode(amf3_data)
-				print '>>>>>>>>>>>>>>>>>>>>>>>>>>> data: ', data
+				LOG.info("data: %s" % (data))
 				try:
 					callback = self._callback[cmd]
 					callback(self, playerid, rqstid, data) 
 				except KeyError:
-					print "[warning]	CMD error. The CMD: %s cant not be handled" % (pattern.to_hex(cmd))
+					LOG.ERROR("CMD error, The CMD: %s can not be handled" %
+					(pattern.to_hex(cmd)))
 					break
 
 	def send_rsp(self, cmd, playerid, rqstid, pkt):
@@ -158,13 +136,13 @@ class CConn2Center(CCallback):
 		self.forward_msg(cmd, amf3_data, playerid, rqstid, flag = 0)
 
 	def start(self):
-		print 'called start'
+		LOG.info("conn2center start...")
 		while 1:
 			data, address = self.get_sock().recvfrom(8192)
-			print 'data: ', repr(data)
+			LOG.debug("data received: %s" % (repr(data)))
 			if data:
 				gevent.spawn(self.dataReceived, data)
-				print "job's done"
+				LOG.info("job's done")
 			else:
 				self.get_sock().close()
 				break 

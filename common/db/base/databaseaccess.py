@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pymongo
+from log.log import LOG, TYPE
 from pymongo import (connection,
 		     database,
 		     collection)
@@ -17,32 +18,14 @@ class CDataBaseAccess:
 	        """
 		self.con=connection.Connection(address,port)
 		
-		print "print self.con..."
-		print self.con
+		LOG.info("self.con: %s" % (self.con))
 		
 		if db is None:
 			self.db=None
 		else:	
 			self.db=database.Database(self.con,db)
-			print "print self.db..."
-			print self.db	
-		
-			print "print collection"
-			l=self.db.collection_names()	
-			print l	
-
-		#	testPackage=self.db.__getitem__("T_Package")
-		#	print testPackage
-		
-		#	print "print sub collection..."
-		#	item=testPackage.__getitem__("I_PackageId")
-		#	print item
-		
-		#	count=testPackage.count()
-		#	print count
-               		
-		#	value=testPackage.distinct("I_PackageId")
-		#	print value
+			LOG.info("self.db: %s" % (self.con))
+			LOG.info("collection: %s" % (self.db.collection_names()))
  		
 	def set_database(self,db_name):
 		""" set Database
@@ -58,12 +41,11 @@ class CDataBaseAccess:
 		if self.db is None:
 			return
 		col=collection.Collection(self.db,col_name)
-		print col
-		print record
+		LOG.info("col:: %s" % (col))
+		LOG.info("record: %s" % (record))
 		try:
 	        	ret = col.insert(record,safe = True)
-			print "ret is ",ret
-			print ret
+			LOG.info("ret is :%s" % (ret))
 		except:
 			return False
 		return True	
@@ -77,10 +59,10 @@ class CDataBaseAccess:
 		if self.db is None:
 			result = False
 		col=collection.Collection(self.db,col_name)
-		print record
+		LOG.info("record: %s" % (record))
 		try:
 			ret = col.update(record[0],record[1],safe=True)
-			print ret
+			LOG.info("ret: %s" % (ret))
 			if ret['update_existing'] == True:
                                 result = True
                         else:
@@ -106,11 +88,11 @@ class CDataBaseAccess:
 		record = []
 		record.append(id_dict)
 		record.append(set_value_dict)
-                print record
+		LOG.info("record: %s" % (record))
 		
 		try:
-                	ret = col.update(record[0],record[1],safe=True)			
-			print ret
+			ret = col.update(record[0],record[1],safe=True)			
+			LOG.info("ret: %s" % (ret))
 			if ret['update_existing'] == False:
 				result = False
 		except:
@@ -124,7 +106,7 @@ class CDataBaseAccess:
 		if self.db is None:
 			return
 		col=collection.Collection(self.db,col_name)
-		print record
+		LOG.info("record: %s" % (record))
 		
 		if skip_num != None and limit_num != None:
                         result = col.find(record,skip=skip_num,limit=limit_num,fields=fields,sort=sort)
@@ -143,9 +125,9 @@ class CDataBaseAccess:
 		if self.db is None:
 			return
 		col=collection.Collection(self.db,col_name)
-		print record
+		LOG.info("record: %s" % (record))
 		result = col.find_one(record,fields=fields)
-		return result
+		LOG.info("result: %s" % (result))
 
 	def remove(self,col_name,record):
 		""" remove date
@@ -155,11 +137,11 @@ class CDataBaseAccess:
 		if self.db is None:
 			result = False
 		col=collection.Collection(self.db,col_name)
-		print record
-		print col
+		LOG.info("record: %s" % (record))
+		LOG.info("col: %s" % (col))
 		try:
 			ret = col.remove(record,safe=True)
-			print ret
+			LOG.info("ret is :%s" % (ret))
 			if ret["n"] == 0L:
 				result = False
 			
@@ -172,15 +154,3 @@ class CDataBaseAccess:
 			return
 		col=collection.Collection(self.db, col_name)
 		col.save(record)
-
-
-if __name__ == '__main__':
-        dbaccess = databaseaccess(db="server")
-	cursor = dbaccess.query_one("fight_npc",{"npc_template_id":12},fields={"npc_template_id":True,"move_type":True})
-        print cursor
-	#for i in cursor:
-	#	print i
-	#dbaccess.insert("serverlist",[{"test_id":1,"test_name":"tname"},{"test_id":2,"test_name":"tname2"}])
-	#cursor = dbaccess.query("serverlist",{},1,2)
-        #for i in cursor:
-        #        print i	

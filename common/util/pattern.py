@@ -10,7 +10,3 @@ def to_hex(val):
 		return val_hex
 	else:
 		return
-
-
-if __name__ == "__main__":
-	print to_hex(-1)

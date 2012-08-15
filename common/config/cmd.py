@@ -23,9 +23,6 @@ def cmd(mod, name, val):
 	CMD[NOTI] = noti_val
 
 
-if __name__ == "config.cmd":
-#if __name__ == "common.config.CMD":
-#if __name__ == "__main__":
-	cmd("PLAYER", "CHECK_PLAYER", 				1)
-	cmd("PLAYER", "GET_RECOMMAND_PLAYER_INFO",	2)
-	cmd("PLAYER", "CREATE_PLAYER", 				3)
+cmd("PLAYER", "CHECK_PLAYER", 				1)
+cmd("PLAYER", "GET_RECOMMAND_PLAYER_INFO",	2)
+cmd("PLAYER", "CREATE_PLAYER", 				3)
