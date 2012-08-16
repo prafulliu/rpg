@@ -1,1 +1,1 @@
-python main.py > ../log/player.log &
+nohup python player.py > ../log/player.log 2>&1 &

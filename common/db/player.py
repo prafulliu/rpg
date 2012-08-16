@@ -8,6 +8,7 @@ import db.base.mongoconf as mongoconf
 import config.mapconfig as mapconfig
 from db.base.databaseaccess import CDataBaseAccess
 from db.base.autoincpk import CAutoIncPk
+from log.log import LOG, TYPE
 
 rpg_access = CDataBaseAccess(mongoconf.IP, mongoconf.PORT,
 							mongoconf.DB_RPG)
@@ -110,7 +111,6 @@ def check_player(zone, passport_id, sitekey, sign):
 			value['created'] = True
 		else:
 			value['created'] = False
-		
 		result = 0
 		retVal['value'] = value
 	else:
@@ -171,6 +171,7 @@ def check_zone(zone):
 
 def check_passport_id(passport_id):
 	#检查账号名称(passport_id)
+	LOG.info("passport_id: %s" % (passport_id))
 	result = False
 	if passport_id != None:
 		passport_id_count = rpg_access.query(COL_PLAYER, {'passport_id':passport_id}).count()
@@ -250,8 +251,9 @@ if __name__ == "__main__":
 
 	#checkName('lily')
 	
-	r = creat_player(name, camp, occupation, zone, passport_id)
-	#r = check_player(zone, passport_id, sitekey, sign)
+#	r = creat_player(name, camp, occupation, zone, passport_id)
+	passport_id = 1033.0	
+	r = check_player(zone, passport_id, sitekey, sign)
 	#print r['value']['player']['name']
 	print r
 	#data = {'name':'草'}

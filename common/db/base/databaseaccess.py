@@ -128,6 +128,7 @@ class CDataBaseAccess:
 		LOG.info("record: %s" % (record))
 		result = col.find_one(record,fields=fields)
 		LOG.info("result: %s" % (result))
+		return result
 
 	def remove(self,col_name,record):
 		""" remove date
