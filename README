@@ -1,6 +1,6 @@
 
-set PYTHONPATH rpg/common
+set $PYTHONPATH to "common" directory
 
-run python player/player.py
+run player/run.sh
 
 
