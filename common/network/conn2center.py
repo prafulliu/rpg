@@ -24,15 +24,12 @@ class CConn2Center(CCallback):
 		self._channel_name = channel_name
 		self._rqstid = {}
 
-		self._sock.connect(adds)
-		self.verify()
-
-	#	try:
-	#		self._sock.connect(adds)
-	#		self.verify()
-	#	except:
-	#		LOG.info("connected failed")
-	#		sys.exit(0)
+		try:
+			self._sock.connect(adds)
+			self.verify()
+		except:
+			LOG.info("connected failed")
+			sys.exit(0)
 
 	def verify(self):
 		# [uint32 channel_id][string channel_name][string key]
