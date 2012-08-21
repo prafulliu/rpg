@@ -9,8 +9,7 @@ from gevent import event
 from gevent.queue import Queue
 from amfast.decoder import Decoder
 from amfast.encoder import Encoder
-import config.config as config
-import db.player as player
+import db.player.player as player
 from log.log import LOG, TYPE
 from config.cmd import CMD
 from network.conn2center import CConn2Center
