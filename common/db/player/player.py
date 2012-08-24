@@ -56,10 +56,10 @@ class CPlayer():
 		self.str_add				 = 0
 		self.str_max				 = 0
 
-		self.int					 = 0
-		self.int_potential			 = 0
-		self.int_add				 = 0
-		self.int_max				 = 0
+		self.und					 = 0
+		self.und_potential			 = 0
+		self.und_add				 = 0
+		self.und_max				 = 0
 
 		self.phy					 = 0
 		self.phy_potential			 = 0
