@@ -18,14 +18,14 @@ class CDataBaseAccess:
 	        """
 		self.con=connection.Connection(address,port)
 		
-		LOG.info("self.con: %s" % (self.con))
+		#LOG.info("self.con: %s" % (self.con))
 		
 		if db is None:
 			self.db=None
 		else:	
 			self.db=database.Database(self.con,db)
-			LOG.info("self.db: %s" % (self.con))
-			LOG.info("collection: %s" % (self.db.collection_names()))
+			#LOG.info("self.db: %s" % (self.con))
+			#LOG.info("collection: %s" % (self.db.collection_names()))
  		
 	def set_database(self,db_name):
 		""" set Database
@@ -41,11 +41,11 @@ class CDataBaseAccess:
 		if self.db is None:
 			return
 		col=collection.Collection(self.db,col_name)
-		LOG.info("col:: %s" % (col))
-		LOG.info("record: %s" % (record))
+		#LOG.info("col:: %s" % (col))
+		#LOG.info("record: %s" % (record))
 		try:
 	        	ret = col.insert(record,safe = True)
-			LOG.info("ret is :%s" % (ret))
+			#LOG.info("ret is :%s" % (ret))
 		except:
 			return False
 		return True	
@@ -59,10 +59,10 @@ class CDataBaseAccess:
 		if self.db is None:
 			result = False
 		col=collection.Collection(self.db,col_name)
-		LOG.info("record: %s" % (record))
+		#LOG.info("record: %s" % (record))
 		try:
 			ret = col.update(record[0],record[1],safe=True)
-			LOG.info("ret: %s" % (ret))
+			#LOG.info("ret: %s" % (ret))
 			if ret['update_existing'] == True:
                                 result = True
                         else:
@@ -88,11 +88,11 @@ class CDataBaseAccess:
 		record = []
 		record.append(id_dict)
 		record.append(set_value_dict)
-		LOG.info("record: %s" % (record))
+		#LOG.info("record: %s" % (record))
 		
 		try:
 			ret = col.update(record[0],record[1],safe=True)			
-			LOG.info("ret: %s" % (ret))
+			#LOG.info("ret: %s" % (ret))
 			if ret['update_existing'] == False:
 				result = False
 		except:
@@ -106,7 +106,7 @@ class CDataBaseAccess:
 		if self.db is None:
 			return
 		col=collection.Collection(self.db,col_name)
-		LOG.info("record: %s" % (record))
+		#LOG.info("record: %s" % (record))
 		
 		if skip_num != None and limit_num != None:
                         result = col.find(record,skip=skip_num,limit=limit_num,fields=fields,sort=sort)
@@ -125,9 +125,9 @@ class CDataBaseAccess:
 		if self.db is None:
 			return
 		col=collection.Collection(self.db,col_name)
-		LOG.info("record: %s" % (record))
+		#LOG.info("record: %s" % (record))
 		result = col.find_one(record,fields=fields)
-		LOG.info("result: %s" % (result))
+		#LOG.info("result: %s" % (result))
 		return result
 
 	def remove(self,col_name,record):
@@ -138,11 +138,11 @@ class CDataBaseAccess:
 		if self.db is None:
 			result = False
 		col=collection.Collection(self.db,col_name)
-		LOG.info("record: %s" % (record))
-		LOG.info("col: %s" % (col))
+		#LOG.info("record: %s" % (record))
+		#LOG.info("col: %s" % (col))
 		try:
 			ret = col.remove(record,safe=True)
-			LOG.info("ret is :%s" % (ret))
+			#LOG.info("ret is :%s" % (ret))
 			if ret["n"] == 0L:
 				result = False
 			
