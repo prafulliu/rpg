@@ -56,6 +56,7 @@ class CCsvParser:
 			_col_name_list = set(self.col_name_list)
 			if len(_query&_col_name_list) != len(query):
 				result = False
+		print 'result: ', result
 		return result
 		
 	def get(self, key):
@@ -71,9 +72,12 @@ class CCsvParser:
 				pklist = self.k2pkdict[_k][_v]
 				for i in xrange(len(pklist)):
 					query_result[pklist[i]] = self.get(pklist[i])
+		print 'self.col_name_list: ', self.col_name_list
+		print 'query_result: ', query_result
 		return query_result
 
 	def find(self, query):
+		print 'query: ', query
 		query_result = {}
 		if self.chk_query(query):
 			query_result = self.get_query(query)

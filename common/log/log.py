@@ -1,15 +1,17 @@
 import logging
 import os
 
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
 class CLog():
 	def __init__(self, log_name):
+		logging.basicConfig(format = FORMAT)
 		self._log_name   = log_name
 		self._logger     = logging.getLogger(log_name)
-		self._screen_log = logging.StreamHandler()
-		self._format     = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+		#self._screen_log = logging.StreamHandler()
 
-		self._screen_log.setFormatter(self._format)	
-		self._logger.addHandler(self._screen_log)
+		#self._screen_log.setFormatter(self._format)	
+		#self._logger.addHandler(self._screen_log)
 
 	def get_logger(self):
 		return self._logger

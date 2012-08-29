@@ -18,9 +18,10 @@ from config import config
 LOG.setLevel(TYPE.DEBUG)
 
 def create_player(conn, playerid, rqstid, pkt):
-	LOG.info("conn: %s, playerid: %s, rqstid: %s, pkt: %s" % (conn, playerid,
-														   rqstid, pkt))
-	retVal = player.create_player(pkt["name"], pkt["camp"], pkt["occupation"], pkt["passport_id"])
+	LOG.info("conn: %s, playerid: %s, rqstid: %s, pkt: %s" % (conn, playerid,\
+		rqstid, pkt))
+	retVal = player.create_player(pkt["name"], pkt["camp"], pkt["occupation"],\
+		pkt["passport_id"])
 	LOG.info("send data back ----------------->")
 	LOG.info("retVal: %s" % (retVal))
 	conn.send_rsp(CMD["PLAYER_CREATE_PLAYER_REP"], playerid, rqstid, retVal) 

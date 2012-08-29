@@ -3,6 +3,7 @@ import struct
 import gevent
 import sys
 import uuid
+import traceback
 
 from gevent import socket
 from gevent import event
@@ -28,7 +29,9 @@ class CConn2Center(CCallback):
 			self._sock.connect(adds)
 			self.verify()
 		except:
-			LOG.info("connected failed")
+			exc_type, exc_value, exc_traceback = sys.exc_info()
+			traceback.print_exception(exc_type, exc_value, exc_traceback,limit=2,file=sys.stdout)
+			LOG.critical("connected failed")
 			sys.exit(0)
 
 	def verify(self):

@@ -61,8 +61,6 @@ def get_player_cur_task_num(playerid):
 	task_count = rpg_access.query(COL_TASK, {'playerid':playerid}).count()
 	return task_count
 
-def get_can_accept_tasklist(player):
-	pass
 
 def get_num_reward(task_temp):
 	num_reward = {}
@@ -122,7 +120,16 @@ def get_item_reward(task_temp):
 		item_reward['icon']	     = task_temp['r_item']['icon']	
 		item_reward['name']		 = task_temp['r_item']['name']	
 	return item_reward
-	
+
+def get_targetlist(task, task_temp):
+    if task['state'] ==  taskconfig.STATE_DONE:
+        targetlist = task_temp['task_reward']
+    elif task['state'] ==  taskconfig.STATE_UNDONE:
+        targetlist = task_temp['task_down']
+    elif task['state'] ==  taskconfig.STATE_UNDERWAY:
+        targetlist = task_temp['task_down']
+    print 'targetlist: ', targetlist
+    return targetlist
 
 def get_task_info(task):
 	task_info = {}
@@ -133,7 +140,7 @@ def get_task_info(task):
 	task_info['name']		= task_temp['name']	
 	#task_info['desc']		= task_temp['desc']	
 	task_info['chapter']	= task_temp['chapter']	
-#	task_info['targetlist']	= task_temp['targetlist']	
+	task_info['targetlist'] = get_targetlist(task, task_temp)
 	task_info['num_reward']	= get_num_reward(task_temp)
 	task_info['item_reward']= get_item_reward(task_temp)
 	print 'task_info: ', task_info
@@ -153,7 +160,30 @@ def get_current_tasklist(player):
 					__tasklist['succ_cnt'] = __tasklist['succ_cnt'] + 1
 				task.append(get_task_info(_task))
 			tasklist.append(__tasklist)
+	return tasklist
+
+def get_can_accept_tasklist(player):
+	tasklist = []
+	for i in taskconfig.TASK_TYPE:
+		_tasklist = rpg_access.query(COL_TASK, {'playerid':playerid, 'type':i}).sort("type")
+		_player_curlv_tasklist = TASK_CSV.find({'min_lv':str(player['lv'])})
+		#_player_nextlv_tasklist = TASK_CSV.find({'min_lv':playerid['lv']+1})
+	
+		print _player_curlv_tasklist
+		#print _player_nextlv_tasklist
+	#	if _tasklist.count() != 0:
+	#		__tasklist = {}
+	#		__tasklist['total_cnt'] = _tasklist.count()
+	#		__tasklist['type'] = i
+	#		__tasklist['succ_cnt'] = 0
+	#		for _task in _tasklist:
+	#			task = []
+	#			if _task['state'] == taskconfig.STATE_DONE:
+	#				__tasklist['succ_cnt'] = __tasklist['succ_cnt'] + 1
+	#			task.append(get_task_info(_task))
+	#		tasklist.append(__tasklist)
 	print tasklist
+
 
 def get_tasklist_board(playerid, model):
 	retVal = {}
@@ -185,7 +215,7 @@ def get_tasklist_board(playerid, model):
 if __name__ == "__main__":
 	playerid = 28
 	id = '10001'
-	model = 1
+	model = 2
 	#r = create_task(playerid, id)
 	r = get_tasklist_board(playerid, model)
 	print r

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*- 
 from twisted.internet import reactor
 from twisted.internet.protocol import Protocol, Factory
+import util.pattern as pattern
+
 import struct
 import time
 
@@ -25,13 +27,13 @@ PLAYER_ID = 1000000000
 #  'H' format requires 0 <= number <= 65535
 MSG_CHANNEL = 55555
 
-CMD		= 0x00000001
+#CMD		= 0x00000001
 #CMD	 = 0x00000009
-#CMD	 = 0x00000003 
+CMD	 = 0x00000003 
 
 data = {"zone":0, "passport_id":'2', "sitekey":0, "sign":0}
 #data = {}
-#data = {"name":"james", "camp":2, "occupation":1, "passport_id":"lpf"}
+data = {"name":"james", "camp":2, "occupation":1, "passport_id":"lpf2"}
 
 AMF3_DATA = encoder.encode(data)
 
@@ -110,7 +112,7 @@ class pythonServer(Protocol):
 							if len(self._buffer[9+count*4:])>=len(self._buffer[5+count*4:5+count*4+1+4+4]):
 								(seprator, cmd, amf3_data_len) = struct.unpack("!sII", self._buffer[5+count*4:5+count*4+1+4+4])
 								print 'seprator: ', repr(seprator)
-								print '--------------------------cmd: ', cmd
+								print '--------------------------cmd:',pattern.to_hex(cmd)
 								print 'amf3_data_len: ', amf3_data_len
 								print 'total len :', len(self._buffer)
 								#print 'len :', 9+count*4+1+4+4+amf3_data_len
