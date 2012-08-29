@@ -86,8 +86,8 @@ if __name__ == '__main__':
 	#print p.get_all()
 	mql = {'snpc':'200000001'}
 	#mql = {'id':'10001'}
-	r = p.find(mql)
-	#r = p.get(id)
+	#r = p.find(mql)
+	r = p.get(id)
 	#r = p.get_all()
 	#print p.pk2vdict.keys()
-	#print r
+	print r
