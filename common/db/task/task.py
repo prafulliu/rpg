@@ -12,41 +12,67 @@ from db.base.databaseaccess import CDataBaseAccess
 from db.base.autoincpk import CAutoIncPk
 from log.log import LOG, TYPE
 
-rpg_access = CDataBaseAccess(mongoconf.IP, mongoconf.PORT,
-							mongoconf.DB_RPG)
+rpg_access       = CDataBaseAccess(mongoconf.IP, mongoconf.PORT, mongoconf.DB_RPG)
 
-COL_TASK = mongoconf.COL_TASK
-COL_PLAYER  = mongoconf.COL_PLAYER
-
-TASK_CSV =  CCsvParser("task.csv")
+COL_TASK         = mongoconf.COL_TASK
+COL_PLAYER       = mongoconf.COL_PLAYER
+COL_ENTRUST_TASK = mongoconf.COL_ENTRUST_TASK
+TASK_CSV         =  CCsvParser("task.csv")
 
 class CTask():
 	#创建任务
 	def __init__(self, playerid, id):
-		_id = CAutoIncPk().get_pk_by_name(COL_TASK)
-		self._id					 = _id
-
-		self.playerid				 = playerid
-		self.taskid			         = id
-		self.state                   = taskconfig.STATE_UNDONE
-		self.type                    = int(TASK_CSV.get(id)['type'])
+		_id           = CAutoIncPk().get_pk_by_name(COL_TASK)
+		self._id      = _id
+		self.playerid = playerid
+		self.id       = id
+		self.state    = taskconfig.STATE_UNDONE
+		self.type     = int(TASK_CSV.get(id)['type'])
+		self.num      = 0
 		rpg_access.insert(COL_TASK, vars(self))
 
+class CEntrustTask(object):
+	#新建委托任务
+	def __init__(self, playerid, id_list, time_req):
+		_id           = CAutoIncPk().get_pk_by_name(COL_ENTRUST_TASK)
+		self._id      = _id
+		self.playerid = playerid
+		self.id_list  = id_list
+		self.time_req = time_req
+		rpg_access.insert(COL_ENTRUST_TASK, vars(self))
+		
 def check_playerid(playerid):
 	player = rpg_access.query_one(COL_PLAYER, {'_id':playerid})
 	return player
 
-def check_taskid(taskid):
-	pass	
+def check_id(id):
+	task_temp = TASK_CSV.get(id):
+	return task_temp
+
+def check_player_task(player, id):
+	result = False
+	if task_temp:
+		#该任务id存在
+		if player.lv >= task_temp.min_lv  and player.lv <= task_temp.max_lv:
+			task = rpg_access.query_one(COL_TASK, {'playerid':player._id}):
+			if task:
+				#该任务接过
+				if task_temp.can_loop == 1 and task.num < task_temp.max_loop:
+					result = True
+			else:	
+				result = True
 
 def create_task(playerid, id):
 	retVal = {}
 	player = check_playerid(playerid)
 	if player:
-		CTask(playerid, id)
-		result = 0
+		if check_player_task(player, id):
+			CTask(playerid, id)
+			result = 0
+		else:
+			result = 1
 	else:
-		result = 1
+		result = -1
 	retVal['result'] = result
 	return result
 
@@ -61,6 +87,9 @@ def get_player_cur_task_num(playerid):
 	task_count = rpg_access.query(COL_TASK, {'playerid':playerid}).count()
 	return task_count
 
+def get_player_daily_task_num(playerid):
+	task_count = rpg_access.query(COL_TASK, {'playerid':playerid, 'type':taskconfig.TASK_TYPE['DAILY']}).count()
+	return task_count
 
 def get_num_reward(task_temp):
 	num_reward = {}
@@ -133,7 +162,7 @@ def get_targetlist(task, task_temp):
 
 def get_task_info(task):
 	task_info = {}
-	task_temp = TASK_CSV.get(task['taskid'])
+	task_temp = TASK_CSV.get(task['id'])
 	task_info['state']		= task['state']	
 	task_info['lv']			= task_temp['min_lv']	
 	task_info['id']			= task_temp['id']	
@@ -143,11 +172,13 @@ def get_task_info(task):
 	task_info['targetlist'] = get_targetlist(task, task_temp)
 	task_info['num_reward']	= get_num_reward(task_temp)
 	task_info['item_reward']= get_item_reward(task_temp)
+
+	task_info['taskid']		= task['_id']	
 	print 'task_info: ', task_info
 
 def get_current_tasklist(player):
 	tasklist = []
-	for i in taskconfig.TASK_TYPE:
+	for i in (taskconfig.TASK_TYPE):
 		_tasklist = rpg_access.query(COL_TASK, {'playerid':playerid, 'type':i}).sort("type")
 		if _tasklist.count() != 0:
 			__tasklist = {}
@@ -164,7 +195,7 @@ def get_current_tasklist(player):
 
 def get_can_accept_tasklist(player):
 	tasklist = []
-	for i in taskconfig.TASK_TYPE:
+	for i in len(taskconfig.TASK_TYPE):
 		_tasklist = rpg_access.query(COL_TASK, {'playerid':playerid, 'type':i}).sort("type")
 		_player_curlv_tasklist = TASK_CSV.find({'min_lv':str(player['lv'])})
 		#_player_nextlv_tasklist = TASK_CSV.find({'min_lv':playerid['lv']+1})
@@ -208,9 +239,136 @@ def get_tasklist_board(playerid, model):
 		result = -1
 	retVal['result'] = result
 	return retVal
+	
+def accept(playerid, id):
+	retVal = {}
+	player = check_playerid(playerid)
+	if player:
+		result = create_task(playerid, id)
+	else:
+	result = -1
+	retVal['result'] = result
+	return retVal
+
+def is_accept(playerid, taksid):
+	result = False;
+	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid}):
+	if task:
+		if task.state != taskconfig.STATE_SUBMITTED:
+			result = True
+
+def drop(playerid, taksid):
+	retVal = {}
+	player = check_playerid(playerid)
+	if player:
+		if is_accept(playerid, taksid):
+			rpg_access.remove(COL_TASK, {'_id':taksid})
+			result = 0
+		else:
+			result = 1
+	else:
+	result = -1
+	retVal['result'] = result
+	return retVal
+
+def is_done(playerid, taskid):
+	result = False;
+	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid}):
+	if task:
+		if task.state == taskconfig.STATE_DONE:
+			result = True
+
+def is_submitted(playerid, taskid):
+	result = False;
+	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid}):
+	if task:
+		if task.state == taskconfig.STATE_SUBMITTED:
+			result = True
 
 
+def deliver_reward(player, id):
+	task_temp = TASK_CSV.find(id)
 
+
+def accomplish(playerid, taskid, item_tmpl_list):
+	retVal = {}
+	player = check_playerid(playerid)
+	if player:
+		if is_done(playerid, taksid):
+			task = rpg_access.query_one(COL_TASK, {'_id':taksid})
+			if check_item_tmpl_list(item_tmpl_list):
+				if deliver_reward(player, task['id'])
+					task.state = taskconfig.STATE_SUBMITTED
+					result = 0
+				else:
+					result = 3
+			else:
+				result = 2
+		else:
+			result = 1		
+	else:
+	result = -1
+	retVal['result'] = result
+	return retVal
+
+def is_daily_task_full(playerid):
+	result = True
+	if get_player_daily_task_num(playerid) < taskconfig.TASK_MAX:
+		result = False
+	return result
+
+def get_time_req(id_list):
+	return taskconfig.ENTRUST_TIME_NEED * len(id_list)
+
+def create_entrust_task(playerid, id_list):
+	time_req = get_time_req(id_list)
+	CEntrustTask(playerid, id_list, time_req)
+	return time_req
+
+def is_entrusting(playerid):
+	return rpg_access.query_one(COL_ENTRUST_TASK, {'playerid':playerid}):
+
+
+def post_entrust_tasklist(playerid, id_list):
+	retVal = {}
+	player = check_playerid(playerid)
+	if player:
+		if check_id_list(id_list):
+			if not is_daily_task_full(playerid):
+				if is_entrusting(playerid):
+					time_req = create_entrust_task(playerid)
+					retVal['time_req'] = time_req
+					result = 0					
+				else:
+					result = 3
+			else:
+				result = 2
+		else:
+			result = 1
+	else:
+	result = -1
+	retVal['result'] = result
+	return retVal
+
+def get_entrust_time_left(playerid):
+	retVal = {}
+	player = check_playerid(playerid)
+	if player:
+		task = is_entrusting(playerid)
+		if task:
+			time_diff = time.time() - task.time_start
+
+			if time_diff >= task.time_req:
+				time_left = 0
+			else:
+				time_left = task.time_req - time_diff
+			retVal['time_left'] = time_left
+		else:
+			result = 1
+	else:
+		result = -1
+		retVal['result'] = result
+	return retVal
 
 if __name__ == "__main__":
 	playerid = 28
