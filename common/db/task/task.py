@@ -27,7 +27,7 @@ class CTask():
 		self.playerid = playerid
 		self.id       = id
 		self.state    = taskconfig.STATE_UNDONE
-		self.type     = int(TASK_CSV.get(id)['type'])
+		self.type     = TASK_CSV.get(id)['type']
 		self.num      = 0
 		rpg_access.insert(COL_TASK, vars(self))
 
@@ -46,7 +46,7 @@ def check_playerid(playerid):
 	return player
 
 def check_id(id):
-	task_temp = TASK_CSV.get(id):
+	task_temp = TASK_CSV.get(id)
 	return task_temp
 
 def check_player_task(player, id):
@@ -54,7 +54,7 @@ def check_player_task(player, id):
 	if task_temp:
 		#该任务id存在
 		if player.lv >= task_temp.min_lv  and player.lv <= task_temp.max_lv:
-			task = rpg_access.query_one(COL_TASK, {'playerid':player._id}):
+			task = rpg_access.query_one(COL_TASK, {'playerid':player._id})
 			if task:
 				#该任务接过
 				if task_temp.can_loop == 1 and task.num < task_temp.max_loop:
@@ -246,13 +246,13 @@ def accept(playerid, id):
 	if player:
 		result = create_task(playerid, id)
 	else:
-	result = -1
+		result = -1
 	retVal['result'] = result
 	return retVal
 
 def is_accept(playerid, taksid):
 	result = False;
-	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid}):
+	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid})
 	if task:
 		if task.state != taskconfig.STATE_SUBMITTED:
 			result = True
@@ -267,20 +267,20 @@ def drop(playerid, taksid):
 		else:
 			result = 1
 	else:
-	result = -1
+		result = -1
 	retVal['result'] = result
 	return retVal
 
 def is_done(playerid, taskid):
 	result = False;
-	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid}):
+	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid})
 	if task:
 		if task.state == taskconfig.STATE_DONE:
 			result = True
 
 def is_submitted(playerid, taskid):
 	result = False;
-	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid}):
+	task = rpg_access.query_one(COL_TASK, {'_id':taksid, 'playerid':playerid})
 	if task:
 		if task.state == taskconfig.STATE_SUBMITTED:
 			result = True
@@ -297,7 +297,7 @@ def accomplish(playerid, taskid, item_tmpl_list):
 		if is_done(playerid, taksid):
 			task = rpg_access.query_one(COL_TASK, {'_id':taksid})
 			if check_item_tmpl_list(item_tmpl_list):
-				if deliver_reward(player, task['id'])
+				if deliver_reward(player, task['id']):
 					task.state = taskconfig.STATE_SUBMITTED
 					result = 0
 				else:
@@ -307,7 +307,7 @@ def accomplish(playerid, taskid, item_tmpl_list):
 		else:
 			result = 1		
 	else:
-	result = -1
+		result = -1
 	retVal['result'] = result
 	return retVal
 
@@ -326,7 +326,7 @@ def create_entrust_task(playerid, id_list):
 	return time_req
 
 def is_entrusting(playerid):
-	return rpg_access.query_one(COL_ENTRUST_TASK, {'playerid':playerid}):
+	return rpg_access.query_one(COL_ENTRUST_TASK, {'playerid':playerid})
 
 
 def post_entrust_tasklist(playerid, id_list):
@@ -346,7 +346,7 @@ def post_entrust_tasklist(playerid, id_list):
 		else:
 			result = 1
 	else:
-	result = -1
+		result = -1
 	retVal['result'] = result
 	return retVal
 
