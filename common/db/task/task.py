@@ -92,48 +92,57 @@ def get_player_daily_task_num(playerid):
 	return task_count
 
 def get_num_reward(task_temp):
-	num_reward = {}
+	num_reward = []
 	if task_temp['r_exp'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '经验值'	
 		_num_reward['num']  = task_temp['r_exp']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_silver'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '银锭'	
 		_num_reward['num']  = task_temp['r_silver']
 		num_reward.append(_num_reward)
 	
 	if task_temp['r_gold'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '金锭'	
 		_num_reward['num']  = task_temp['r_gold']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_jade'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '玉贝'	
 		_num_reward['num']  = task_temp['r_jade']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_prestige'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '威望值'	
 		_num_reward['num']  = task_temp['r_prestige']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_master'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '师徒值'	
 		_num_reward['num']  = task_temp['r_master']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_conjugal'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '夫妻值'	
 		_num_reward['num']  = task_temp['r_conjugal']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_integral'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '任务积分'	
 		_num_reward['num']  = task_temp['r_integral']
 		num_reward.append(_num_reward)
 
 	if task_temp['r_point'] != '':
+		_num_reward = {}
 		_num_reward['name'] = '奖励任务点'	
 		_num_reward['num']  = task_temp['r_point']
 		num_reward.append(_num_reward)
@@ -160,20 +169,16 @@ def get_targetlist(task, task_temp):
     print 'targetlist: ', targetlist
     return targetlist
 
-def get_task_info(task):
+def get_task_info(task_temp):
 	task_info = {}
-	task_temp = TASK_CSV.get(task['id'])
-	task_info['state']		= task['state']	
 	task_info['lv']			= task_temp['min_lv']	
 	task_info['id']			= task_temp['id']	
 	task_info['name']		= task_temp['name']	
 	#task_info['desc']		= task_temp['desc']	
 	task_info['chapter']	= task_temp['chapter']	
-	task_info['targetlist'] = get_targetlist(task, task_temp)
 	task_info['num_reward']	= get_num_reward(task_temp)
 	task_info['item_reward']= get_item_reward(task_temp)
 
-	task_info['taskid']		= task['_id']	
 	print 'task_info: ', task_info
 
 def get_current_tasklist(player):
@@ -189,30 +194,38 @@ def get_current_tasklist(player):
 				task = []
 				if _task['state'] == taskconfig.STATE_DONE:
 					__tasklist['succ_cnt'] = __tasklist['succ_cnt'] + 1
-				task.append(get_task_info(_task))
+				task_temp = TASK_CSV.get(task['id'])
+				task_info['taskid']		= task['_id']	
+				task_info['state']		= task['state']	
+				task_info['targetlist'] = get_targetlist(task, task_temp)
+				_task_info = get_task_info(task_tmp)
+				task.append(_task_info)
 			tasklist.append(__tasklist)
 	return tasklist
 
 def get_can_accept_tasklist(player):
 	tasklist = []
-	for i in len(taskconfig.TASK_TYPE):
-		_tasklist = rpg_access.query(COL_TASK, {'playerid':playerid, 'type':i}).sort("type")
-		_player_curlv_tasklist = TASK_CSV.find({'min_lv':str(player['lv'])})
-		#_player_nextlv_tasklist = TASK_CSV.find({'min_lv':playerid['lv']+1})
-	
-		print _player_curlv_tasklist
-		#print _player_nextlv_tasklist
-	#	if _tasklist.count() != 0:
-	#		__tasklist = {}
-	#		__tasklist['total_cnt'] = _tasklist.count()
-	#		__tasklist['type'] = i
-	#		__tasklist['succ_cnt'] = 0
-	#		for _task in _tasklist:
-	#			task = []
-	#			if _task['state'] == taskconfig.STATE_DONE:
-	#				__tasklist['succ_cnt'] = __tasklist['succ_cnt'] + 1
-	#			task.append(get_task_info(_task))
-	#		tasklist.append(__tasklist)
+	for type in xrange(1, len(taskconfig.TASK_TYPE)+1):
+		#_tasklist = rpg_access.query(COL_TASK, {'playerid':playerid, 'type':i+1}).sort("type")
+		_player_curlv_tasklist = TASK_CSV.find({'min_lv':player['lv'],\
+										  'type':type})
+		_player_nextlv_tasklist = TASK_CSV.find({'min_lv':(player['lv']+1),
+										   'type':type})
+		_tasklist = _player_curlv_tasklist.copy()
+		_tasklist.update(_player_nextlv_tasklist)
+		
+		#print '_player_curlv_tasklist result: ', len(_player_curlv_tasklist)
+		#print '_player_nextlv_tasklist  result: ', len(_player_nextlv_tasklist )
+		#print '_player_tasklist  result: ', len(_player_tasklist )
+
+		if _tasklist != {}:
+			__tasklist = {}
+			__tasklist['type'] = type
+			for _key, _task in _tasklist.iteritems():
+				_task_info = get_task_info(_task)
+				_task_info['state']		= get_task_state()
+				task.append(_task_info)
+			tasklist.append(__tasklist)
 	print tasklist
 
 
@@ -376,4 +389,4 @@ if __name__ == "__main__":
 	model = 2
 	#r = create_task(playerid, id)
 	r = get_tasklist_board(playerid, model)
-	print r
+	#print r

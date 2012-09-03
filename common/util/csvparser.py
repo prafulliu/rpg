@@ -78,14 +78,23 @@ class CCsvParser:
 	
 	def get_query(self, query):
 		query_result = {}
+		pklist = set([])
 		for _k, _v in query.iteritems():
 			if _v in self.k2pkdict[_k]:
-				pklist = list(self.k2pkdict[_k][_v])
-				for i in xrange(len(pklist)):
-					query_result[pklist[i]] = self.get(pklist[i])
+				if pklist != set([]):
+					pklist = set(list(self.k2pkdict[_k][_v]))&pklist
+				else:
+					pklist = set(list(self.k2pkdict[_k][_v]))
+			else:
+				pklist = {}
+				break
+		pklist = list(pklist)
+		for i in xrange(len(pklist)):
+			query_result[pklist[i]] = self.get(pklist[i])
 		return query_result
 
 	def find(self, query):
+		#print 'query: ', query
 		query_result = {}
 		if self.chk_query(query):
 			query_result = self.get_query(query)
@@ -97,14 +106,17 @@ def main():
 	# id = '10001'
 	#print p.get_all()
 	#mql = {'snpc':200000001}
-	mql = {'id':10001}
+	mql = {'type':100, 'min_lv':2}
+	#mql = {'type':100}
+#	mql = {'min_lv':2}
 	r = p.find(mql)
 	# r = p.get(id)
 	#r = p.get_all()
 	#print p.pk2vdict.keys()
-	print r
+	print 'len(r): ', len(r)
 
 
 if __name__ == '__main__':
-	cProfile.run("main()")
+	#cProfile.run("main()")
+	main()
 	
