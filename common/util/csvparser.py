@@ -1,13 +1,17 @@
-#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
 import csv
 import os
 from StringIO import StringIO
 import cProfile
+#path:  /home/liupf/rpg/common/util
+#_p:    /home/liupf/rpg/co/template/task.csv
 
-def getPythonPath():
-	path = os.environ['PYTHONPATH'][1:]
+
+def get_file_path(file):
+	abspath = os.path.abspath(__file__)
+	path = os.path.split(abspath)[0]
+	path = path[0:len(path)-len('util')]+'template/'+file
 	return path
 
 class CCsvParser:
@@ -33,14 +37,14 @@ class CCsvParser:
 		return _dict
 
 	def parse(self):
-		input_file = getPythonPath()+'/template/'+self.file
+		input_file = get_file_path(self.file)
 		src = file(input_file, "rb")
 		line = src.readline()
 		heading = [_head.strip() for _head in line.split(",")]
 		self.col_name_list = heading 
 		return self._parse_csv(input_file, heading, skip=1)
 
-	def _parse_csv(self, input_file, csv_heading, skip=0, strip=True):
+	def _parse_csv(self, input_file, csv_heading, skip=0):
 		src = file(input_file, "rb")
 		reader = csv.DictReader(src, csv_heading)
 		# skip the first line
@@ -50,14 +54,16 @@ class CCsvParser:
 		k2pkdict = {}
 		for head in csv_heading:
 			k2pkdict[head] = {}
+		pk = csv_heading[0]
 		for row in reader:
 			for _k, _v in row.iteritems():
 				row[_k] = _v.strip()
-			result_dict[row['id']] = self.trans_type(row)
+			result_dict[row[pk]] = self.trans_type(row)
 
 		for k, v in result_dict.iteritems():
 			for head in csv_heading:
 				k2pkdict[head].setdefault(v[head], set([])).add(k)
+
 		self.k2pkdict = k2pkdict
 		return result_dict
 
@@ -68,6 +74,7 @@ class CCsvParser:
 			_col_name_list = set(self.col_name_list)
 			if len(_query&_col_name_list) != len(query):
 				result = False
+		print 'result: ', result
 		return result
 		
 	def get(self, key):
@@ -78,23 +85,16 @@ class CCsvParser:
 	
 	def get_query(self, query):
 		query_result = {}
-		pklist = set([])
 		for _k, _v in query.iteritems():
 			if _v in self.k2pkdict[_k]:
-				if pklist != set([]):
-					pklist = set(list(self.k2pkdict[_k][_v]))&pklist
-				else:
-					pklist = set(list(self.k2pkdict[_k][_v]))
-			else:
-				pklist = {}
-				break
-		pklist = list(pklist)
-		for i in xrange(len(pklist)):
-			query_result[pklist[i]] = self.get(pklist[i])
+				pklist = list(self.k2pkdict[_k][_v])
+				print 'pklist: %s' % (pklist)
+				for i in xrange(len(pklist)):
+					query_result[pklist[i]] = self.get(pklist[i])
 		return query_result
 
 	def find(self, query):
-		#print 'query: ', query
+		print 'query: ', query
 		query_result = {}
 		if self.chk_query(query):
 			query_result = self.get_query(query)
@@ -103,20 +103,20 @@ class CCsvParser:
 def main():
 	p = CCsvParser("task.csv")
 	#print p.pk2vdict
-	# id = '10001'
+	id = 10001
 	#print p.get_all()
-	#mql = {'snpc':200000001}
-	mql = {'type':100, 'min_lv':2}
-	#mql = {'type':100}
-#	mql = {'min_lv':2}
+	# mql = {'snpc':'200000001'}
+	mql = {'id':10001}
 	r = p.find(mql)
-	# r = p.get(id)
-	#r = p.get_all()
-	#print p.pk2vdict.keys()
-	print 'len(r): ', len(r)
+	print r
+	# for i in xrange(10):
+	# 	r = p.get(id)
+	# 	print r
+	# 	id = id + i
 
 
 if __name__ == '__main__':
 	#cProfile.run("main()")
-	main()
+	# main()
+	get_file_path('task.csv')
 	
