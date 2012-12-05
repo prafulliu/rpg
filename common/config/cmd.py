@@ -24,5 +24,5 @@ def cmd(mod, name, val):
 
 
 cmd("PLAYER", "CHECK_PLAYER", 				1)
-cmd("PLAYER", "GET_RECOMMAND_PLAYER_INFO",	2)
+cmd("PLAYER", "GET_RECOMMAND_PLAYER_INFO",		2)
 cmd("PLAYER", "CREATE_PLAYER", 				3)
