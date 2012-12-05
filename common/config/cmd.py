@@ -8,8 +8,8 @@ CAT_PLAYER = 0x00000001
 
 CMD = {}
 def cmd(mod, name, val):
-	ACK  = "%s_%s_ACK" % (mod, name)
-	REP  = "%s_%s_REP" % (mod, name)
+	ACK  = "%s_%s_ACK"  % (mod, name)
+	REP  = "%s_%s_REP"  % (mod, name)
 	NOTI = "%s_%s_NOTI" % (mod, name)
 	
 	mod = "CAT_%s" % (mod) 
